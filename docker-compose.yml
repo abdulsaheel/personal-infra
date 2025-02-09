@@ -19,7 +19,7 @@ services:
     container_name: backend
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "9696:8080"
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     healthcheck:
@@ -28,6 +28,16 @@ services:
       timeout: 5s
       retries: 3
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"   # Web UI Access
+      - "9443:9443"   # Secure HTTPS Access
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Needed to manage Docker
+      - portainer_data:/data  # Persistent storage for Portainer
 
   watchtower-global:
     image: containrrr/watchtower:latest
