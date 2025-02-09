@@ -1,0 +1,56 @@
+services:
+
+  frontend:
+    image: ghcr.io/catalogfi/dummy_frontend_image:latest
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "7979:80"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    image: ghcr.io/catalogfi/dummy_backend_image:latest
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+
+  watchtower-global:
+    image: containrrr/watchtower:latest
+    container_name: watchtower-global
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/azureuser/.docker/config.json:/config.json
+    command: --interval 30 --rolling-restart --scope none --debug
+    healthcheck:
+      test: ["CMD", "/watchtower", "--health-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: unless-stopped
+    ports:
+      - "9999:8080"  # Exposes Dozzle on port 9999
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Allows Dozzle to access logs
+
+volumes:
+  portainer_data:
